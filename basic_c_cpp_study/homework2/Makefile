@@ -42,9 +42,17 @@ taskK:
 	clang-format --dry-run -Werror taskK.c
 	gcc -std=c99 -Wall -Wextra -Werror taskK.c -o taskK
 
+taskL:
+	clang-format --dry-run -Werror taskL.c
+	gcc -std=c99 -Wall -Wextra -Werror taskL.c -o taskL
+
 taskM:
 	clang-format --dry-run -Werror taskM.c
 	gcc -std=c99 -Wall -Wextra -Werror taskM.c -o taskM
+
+taskN:
+	clang-format --dry-run -Werror taskN.c
+	gcc -std=c99 -Wall -Wextra -Werror taskN.c -o taskN
 
 taskO:
 	clang-format --dry-run -Werror taskO.c
@@ -53,4 +61,4 @@ taskO:
 clean:
 	rm -f taskA taskB taskC taskD taskE taskF \
 	      taskG taskH taskI taskJ taskK \
-	      taskM taskO
+	      taskM taskO taskL taskN
