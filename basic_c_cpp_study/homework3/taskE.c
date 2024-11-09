@@ -4,9 +4,6 @@
 
 #include <ctype.h>
 
-#define MAX_LINES 10
-#define MAX_LENGTH 256
-
 /**
  * Description:
  *
@@ -17,54 +14,62 @@
  * знаки препинания и регистр.
  */
 
-short is_palindrome(const char* str)
+short ispalindrome(char* sentence)
 {
-    unsigned left = 0;
-    unsigned right = strlen(str);
+    char* left = sentence;
+    char* right = sentence + strlen(sentence);
+    if (right - left < 3) {
+        return 0;
+    }
+
+    char* begin = left;
+    char* end = right;
 
     while (left < right) {
-        while (left < right && !isalnum(str[left])) {
+        while (!isalnum(*left) && left < end) {
             left++;
         }
-        while (left < right && !isalnum(str[right])) {
+        while (!isalnum(*right) && right >= begin) {
             right--;
         }
         if (left >= right) {
             break;
         }
 
-        if (tolower(str[left]) != tolower(str[right])) {
+        if (tolower(*left) != tolower(*right)) {
             return 0;
         }
 
         left++;
         right--;
     }
+
     return 1;
 }
 
-int main(void)
+int main()
 {
-    char lines[MAX_LINES][MAX_LENGTH];
-    int palindrome_indexes[MAX_LINES];
-    int count = 0;
+    char buffer[4096];
+    int i = -1;
+    int palindromes[4096] = {};
+    unsigned count = 0;
 
-    for (int i = 0; i < MAX_LINES; i++) {
-        if (!fgets(lines[i], MAX_LENGTH, stdin)) {
-            break;
-        }
-        lines[i][strcspn(lines[i], "\n")] = '\0';
+    while (fgets(buffer, 4096, stdin) != NULL) {
+        i++;
 
-        if (is_palindrome(lines[i])) {
-            palindrome_indexes[count++] = i;
+        if (ispalindrome(buffer)) {
+            palindromes[count++] = i;
         }
     }
 
-    printf("%d\n", count);
-    for (int i = 0; i < count; i++) {
-        printf("%d ", palindrome_indexes[i]);
+    printf("%u\n", count);
+    for (unsigned i = 0; i < count; i++) {
+        if (count - 1 == i) {
+            printf("%d\n", palindromes[i]);
+        } else {
+            printf("%d ", palindromes[i]);
+        }
     }
-    printf("\n");
 
     return 0;
 }
