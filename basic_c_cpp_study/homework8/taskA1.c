@@ -45,18 +45,15 @@ typedef struct {
 void graphClear(const Graph* graph)
 {
     for (int i = 0; i < graph->nodesCount; i++) {
-        if (graph->edges[i] == NULL) {
-            continue;
-        }
-        EdgeList* list = graph->edges[i]->next;
+        EdgeList* list = graph->edges[i];
+
         while (list != NULL) {
             EdgeList* tmp = list;
-            list = tmp->next;
-            free(tmp);
+            list = list->next;
+            free(tmp); // Удаление элемента списка
         }
-        free(graph->edges[i]); // list's root
     }
-    free(graph->edges);
+    free(graph->edges); // Удаление массива указателей
 }
 
 // по индексу в списке получаем вложенный список,
@@ -111,39 +108,31 @@ bool graphIsPathExists(Graph* graph, int nodeFrom, int nodeTo)
 {
     int queuePopIdx = 0;
     int queueAddIdx = 0;
+    // дубли одной вершины могут быть в очереди, поэтому
+    size_t queue_size = graph->nodesCount * 2;
+    int queue[queue_size];
+    queue[queueAddIdx++] = nodeFrom;
 
-    bool* visited = malloc(graph->nodesCount * sizeof(bool));
-    int* queue = malloc(graph->nodesCount * sizeof(int));
-
+    bool visited[graph->nodesCount];
     for (int i = 0; i < graph->nodesCount; i++) {
-        visited[i] = false;
+        visited[i] = (i == nodeFrom) ? true : false;
     }
 
-    queue[queueAddIdx++] = nodeFrom;
-    visited[nodeFrom] = true;
-
     while (queuePopIdx < queueAddIdx) {
-        int currNode = queue[queuePopIdx++];
+        int currNode = queue[queuePopIdx++ % queue_size];
 
         if (currNode == nodeTo) {
-            free(visited);
-            free(queue);
             return true;
         }
 
         // bfs
-        for (int i = 0; i < graph->nodesCount; i++) {
-            if (graphHasEdge(graph, currNode, i)) {
-                if (visited[i] == false) {
-                    queue[queueAddIdx++] = i;
-                    visited[i] = true;
-                }
+        for (EdgeList* item = graph->edges[currNode]; item; item = item->next) {
+            if (visited[item->node] == false) {
+                queue[queueAddIdx++ % queue_size] = item->node;
+                visited[item->node] = true;
             }
         }
     }
-
-    free(visited);
-    free(queue);
 
     return false;
 }

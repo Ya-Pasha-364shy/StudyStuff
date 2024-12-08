@@ -69,18 +69,15 @@ typedef struct Vertex {
 void graphClear(const Graph* graph)
 {
     for (int i = 0; i < graph->nodesCount; i++) {
-        if (graph->edges[i] == NULL) {
-            continue;
-        }
-        EdgeList* list = graph->edges[i]->next;
+        EdgeList* list = graph->edges[i];
+
         while (list != NULL) {
             EdgeList* tmp = list;
-            list = tmp->next;
-            free(tmp);
+            list = list->next;
+            free(tmp); // Удаление элемента списка
         }
-        free(graph->edges[i]); // list's root
     }
-    free(graph->edges);
+    free(graph->edges); // Удаление массива указателей
 }
 
 // по индексу в списке получаем вложенный список,
@@ -142,70 +139,48 @@ int checkPing(Graph* graph, int nodeFrom)
     int queueAddIdx = 0;
     int queuePopIdx = 0;
 
-    int* distances = malloc(graph->nodesCount * sizeof(int));
-    bool* visited = malloc(graph->nodesCount * sizeof(bool));
-    Vertex* queue = calloc(graph->nodesCount, sizeof(Vertex));
+    // bool visited[graph->nodesCount];
 
+    size_t queue_size = graph->nodesCount * 2;
+    Vertex queue[queue_size];
+    queue[queueAddIdx++] = (Vertex) { .node = nodeFrom, .label = 0 };
+
+    int distances[graph->nodesCount];
     for (int i = 0; i < graph->nodesCount; i++) {
-        if (i == nodeFrom) {
-            distances[i] = 0;
-            continue;
-        }
-
-        visited[i] = false;
-        distances[i] = INT_MAX;
+        // visited[i] = false;
+        distances[i] = (i == nodeFrom) ? 0 : INT_MAX;
     }
-    Vertex startV = {
-        .node = nodeFrom,
-        .label = 0
-    };
-    queue[queueAddIdx++] = startV;
 
     while (queueAddIdx > queuePopIdx) {
-        Vertex currentV = queue[queuePopIdx];
+        Vertex currentV = queue[queuePopIdx++ % queue_size];
 
-        if (currentV.label > distances[queuePopIdx++]) {
+        if (currentV.label > distances[currentV.node]) {
             continue;
         }
 
-        // dijkstra
-        for (int i = 0; i < graph->nodesCount; i++) {
-            int weigthEdge = graphGetWeigthIfEdge(graph, currentV.node, i);
-            if (weigthEdge != INT_MIN) {
-                if (visited[i]) {
-                    continue;
-                }
-                int new_cost = distances[currentV.node] + weigthEdge;
+        for (EdgeList* edge = graph->edges[currentV.node]; edge != NULL; edge = edge->next) {
+            // if (visited[edge->node] == true) {
+            //     continue;
+            // }
 
-                if (new_cost < distances[i]) {
-                    Vertex neighbourV = {
-                        .node = i,
-                        .label = new_cost
-                    };
-                    queue[queueAddIdx++] = neighbourV;
-                    distances[i] = new_cost;
-                }
+            int new_cost = distances[currentV.node] + edge->weigth;
+            if (new_cost < distances[edge->node]) {
+                distances[edge->node] = new_cost;
+                queue[queueAddIdx++ % queue_size] = (Vertex) { .node = edge->node, .label = new_cost };
             }
         }
-        visited[currentV.node] = true;
+        // visited[currentV.node] = true;
     }
 
-    if (queueAddIdx != graph->nodesCount) {
-        maxWeigth = -1;
-        goto clear;
-    }
-
-    // check
     for (int i = 0; i < graph->nodesCount; i++) {
+        if (distances[i] == INT_MAX) {
+            maxWeigth = -1;
+            break;
+        }
         if (distances[i] > maxWeigth) {
             maxWeigth = distances[i];
         }
     }
-
-clear:
-    free(queue);
-    free(visited);
-    free(distances);
 
     return maxWeigth;
 }
