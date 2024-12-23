@@ -1,0 +1,64 @@
+stages:
+  - lint
+  - build
+  - test
+
+lint:
+  tags:
+    - docker
+  stage: lint
+  script:
+  - apt-get install -y cppcheck
+  - apt-get install -y make
+  - apt-get install -y valgrind
+  - make check
+
+build:
+  tags:
+    - docker
+  stage: build
+  dependencies:
+  - lint
+  script:
+    - make all
+  artifacts:
+    paths:
+      - longest_sentence_in_file_main
+
+build_test:
+  tags:
+    - docker
+  stage: build
+  dependencies:
+    - lint
+  script:
+    - make test
+  artifacts:
+    paths:
+      - count_words_in_sentence_test
+      - longest_sentence_in_file_test
+
+test:
+  tags:
+    - docker
+  stage: test
+  dependencies:
+    - build_test
+    - build
+  script:
+    - ./count_words_in_sentence_test
+    - ./longest_sentence_in_file_test
+
+test_memory:
+  tags:
+    - docker
+  stage: test
+  dependencies:
+    - build_test
+    - build
+    - test
+  script:
+    - valgrind --error-exitcode=1 --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ./longest_sentence_in_file_main
+    - make clean
+
+

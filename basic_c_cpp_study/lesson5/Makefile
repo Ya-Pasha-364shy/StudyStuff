@@ -20,11 +20,5 @@ $(TEST_TARGET): $(TEST_OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-install: all
-	cp hello -t bin/
-
-uninstall:
-	rm -f bin/hello
-
 clean:
 	rm -f hello hello_test $(OBJS) $(TEST_OBJS)
