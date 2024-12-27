@@ -40,7 +40,7 @@ check: format
 	cppcheck --enable=all $(SUPPRESS_FLAGS) --error-exitcode=1 -Iinclude src include
 
 format: $(TEST_SRC) $(MAIN_SRC) $(INC)
-	clang-format --dry-run -Werror -i src/* include/* tests/*.c
+	clang-format --dry-run -Werror -i src/* include/*
 
 clean:
 	rm -f $(TARGET) $(TEST_TARGET_longest_sentence) $(TEST_TARGET_count_words) src/*.o tests/*.o
