@@ -92,6 +92,7 @@ clear:
     return false;
 }
 
+// unused
 bool graphHasEdge(Graph* graph, int nodeFrom, int nodeTo)
 {
     EdgeList* list = graph->edges[nodeFrom];
